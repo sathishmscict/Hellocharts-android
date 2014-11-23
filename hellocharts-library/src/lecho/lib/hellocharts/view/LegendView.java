@@ -1,18 +1,16 @@
 package lecho.lib.hellocharts.view;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import lecho.lib.hellocharts.BuildConfig;
 import lecho.lib.hellocharts.model.LegendData;
+import lecho.lib.hellocharts.model.LegendValue;
 import lecho.lib.hellocharts.renderer.LegendRenderer;
 import lecho.lib.hellocharts.util.Utils;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Paint.FontMetricsInt;
 import android.graphics.Paint.Style;
 import android.support.v4.view.ViewCompat;
-import android.text.StaticLayout;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -25,19 +23,20 @@ public class LegendView extends View {
 
 	protected LegendData data;
 	protected LegendRenderer renderer;
-	protected List<StaticLayout> staticLayouts = new ArrayList<StaticLayout>();
 	protected float density;
 	protected float scaledDensity;
 
-	private Paint textPaint;
-	private Paint colorPaint;
+	private Paint textPaint = new Paint();
+	private Paint colorPaint = new Paint();
+
+	private FontMetricsInt fontMetrics = new FontMetricsInt();
 
 	public LegendView(Context context) {
-		super(context, null, 0);
+		this(context, null, 0);
 	}
 
 	public LegendView(Context context, AttributeSet attrs) {
-		super(context, attrs, 0);
+		this(context, attrs, 0);
 	}
 
 	public LegendView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -49,12 +48,29 @@ public class LegendView extends View {
 
 		colorPaint.setAntiAlias(true);
 		colorPaint.setStyle(Style.FILL);
+
+		setLegendData(LegendData.generateDummyData());
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 
+		int valueIndex = 0;
+		for (LegendValue value : data.getValues()) {
+			canvas.drawText(value.getText(), getTextX(valueIndex), getTextY(valueIndex), textPaint);
+			++valueIndex;
+		}
+
+	}
+
+	private int getTextX(int valueIndex) {
+		return getPaddingLeft();
+
+	}
+
+	private int getTextY(int valueIndex) {
+		return getPaddingTop() + (valueIndex + 1) * fontMetrics.ascent;
 	}
 
 	public void setLegendData(LegendData data) {
@@ -70,6 +86,7 @@ public class LegendView extends View {
 
 		textPaint.setTextSize(Utils.sp2px(scaledDensity, data.getTextSize()));
 		textPaint.setColor(data.getTextColor());
+		textPaint.getFontMetricsInt(fontMetrics);
 
 		ViewCompat.postInvalidateOnAnimation(LegendView.this);
 	}

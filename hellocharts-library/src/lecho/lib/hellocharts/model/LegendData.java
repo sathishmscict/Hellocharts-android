@@ -33,7 +33,11 @@ public class LegendData {
 	}
 
 	public void setValues(List<LegendValue> values) {
-		this.values = values;
+		if (null == values) {
+			this.values = new ArrayList<LegendValue>();
+		} else {
+			this.values = values;
+		}
 	}
 
 	public static LegendData generateDummyData() {
